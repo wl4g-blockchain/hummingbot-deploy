@@ -1,27 +1,29 @@
 services:
-  dashboard:
-    container_name: dashboard
-    image: hummingbot/dashboard:latest
+  hummingbot-dashboard:
+    container_name: hummingbot-dashboard
+    #image: registry.cn-shenzhen.aliyuncs.com/wl4g/hummingbot_dashboard:2.6.0
+    image: registry.cn-shenzhen.aliyuncs.com/wl4g/hummingbot_dashbaord:latest
     ports:
       - "8501:8501"
     environment:
-        - AUTH_SYSTEM_ENABLED=False
-        - BACKEND_API_HOST=hummingbot-api
-        - BACKEND_API_PORT=8000
-        - BACKEND_API_USERNAME=admin
-        - BACKEND_API_PASSWORD=admin
+      - AUTH_SYSTEM_ENABLED=False
+      - BACKEND_API_HOST=hummingbot-api
+      - BACKEND_API_PORT=8000
+      - BACKEND_API_USERNAME=admin
+      - BACKEND_API_PASSWORD=admin
     volumes:
       - ./credentials.yml:/home/dashboard/credentials.yml
-      - ./pages:/home/dashboard/frontend/pages
+      #- ./pages:/home/dashboard/frontend/pages:rw # Already exist in the image.
     networks:
-        - emqx-bridge
+      - emqx-bridge
+
   hummingbot-api:
     container_name: hummingbot-api
-    image: hummingbot/hummingbot-api:latest
+    image: registry.cn-shenzhen.aliyuncs.com/wl4g/hummingbot_hummingbot-api:1.0.1
     ports:
       - "8000:8000"
     volumes:
-      - ./bots:/hummingbot-api/bots
+      #- ./bots:/hummingbot-api/bots # Already exist in the image.
       - /var/run/docker.sock:/var/run/docker.sock
     env_file:
       - .env
@@ -33,9 +35,10 @@ services:
       - emqx-bridge
     depends_on:
       - postgres
+
   emqx:
     container_name: hummingbot-broker
-    image: emqx:5
+    image: registry.cn-shenzhen.aliyuncs.com/wl4g/emqx_emqx:5.5.0-elixir
     restart: unless-stopped
     environment:
       - EMQX_NAME=emqx
@@ -67,7 +70,7 @@ services:
 
   postgres:
     container_name: hummingbot-postgres
-    image: postgres:15
+    image: registry.cn-shenzhen.aliyuncs.com/wl4g/postgres:15-alpine
     restart: unless-stopped
     environment:
       - POSTGRES_DB=hummingbot_api
